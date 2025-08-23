@@ -5,6 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	"gsurl/httpsvr/middleware"
 	"gsurl/httpsvr/vo"
 	"gsurl/log"
 	"gsurl/service"
@@ -41,5 +42,6 @@ func GetShortUrl(c *gin.Context) {
 		c.JSON(http.StatusNotFound, gin.H{"Error": "Short URL not found"})
 		return
 	}
+	middleware.IncShortUrlReqCounter(shortCode)
 	c.Redirect(http.StatusSeeOther, originalUrl)
 }

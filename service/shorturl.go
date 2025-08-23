@@ -53,7 +53,7 @@ func GetShortUrl(ctx context.Context, shortCode string) (string, error) {
 }
 
 func formstShortUrl(code string) string {
-	return fmt.Sprintf("%s%s", urlPrefix, encode(GenId()))
+	return fmt.Sprintf("%s%s", urlPrefix, code)
 }
 
 func encode(num int64) string {
