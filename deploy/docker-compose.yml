@@ -49,12 +49,13 @@ services:
     restart: unless-stopped
   
   short-url:
-    image: go-proj/short-url:v1.0.5
+    image: go-proj/short-url:v1.0.6
     container_name: short-url
     ports:
       - "8081:8080"
     environment:
-      - DB_HOST=192.168.31.120
+      - DB_HOST=host.docker.internal
+      - SNOWFLAKE_NODE_ID=1
     depends_on:
       - mysql
     restart: unless-stopped

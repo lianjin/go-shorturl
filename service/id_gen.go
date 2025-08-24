@@ -1,12 +1,32 @@
 package service
 
-import "sync/atomic"
+import (
+	"gsurl/log"
+	"os"
+	"strconv"
 
-var (
-	counter = int64(0)
+	"github.com/bwmarrin/snowflake"
 )
 
+var (
+	counter *snowflake.Node
+)
+
+func InitIdGenerator() {
+	nodeIdStr := os.Getenv("SNOWFLAKE_NODE_ID")
+	nodeId, err := strconv.Atoi(nodeIdStr)
+	if err != nil {
+		log.Logger.Errorf("Invalid SNOWFLAKE_NODE_ID: %s", nodeIdStr)
+		panic(err)
+	}
+	node, err := snowflake.NewNode(int64(nodeId))
+	if err != nil {
+		log.Logger.Errorf("Failed to create snowflake node: %v", err)
+		panic(err)
+	}
+	counter = node
+}
+
 func GenId() int64 {
-	atomic.AddInt64(&counter, int64(1))
-	return counter
+	return counter.Generate().Int64()
 }
