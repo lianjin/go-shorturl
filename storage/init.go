@@ -2,13 +2,13 @@ package storage
 
 import (
 	"fmt"
-	"os"
 	"time"
 
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 
+	"gsurl/config"
 	"gsurl/log"
 )
 
@@ -23,8 +23,12 @@ func (l *DBLogger) Printf(format string, v ...interface{}) {
 
 func Init() {
 	// 数据库连接参数
-	host := os.Getenv("DB_HOST")
-	dsn := fmt.Sprintf("dev:123456@tcp(%s:3306)/shorturl?charset=utf8mb4&parseTime=True&loc=Local", host)
+	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local",
+		config.AppConfig.DB.User,
+		config.AppConfig.DB.Password,
+		config.AppConfig.DB.Host,
+		config.AppConfig.DB.Port,
+		config.AppConfig.DB.Database)
 
 	// 日志配置（示例：Info 级别，慢 SQL 超过 1 秒打印，彩色输出）
 	gormLogger := logger.New(

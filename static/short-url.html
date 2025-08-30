@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Short URL</title>
+    <script>
+        async function sendPostRequest() {
+            const input = document.getElementById('urlInput').value;
+            const responseElement = document.getElementById('response');
+
+            try {
+                const response = await fetch('http://shorturl.com/short-url', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ url: input }),
+                });
+
+                const data = await response.json();
+                responseElement.textContent = data['short-url'] || 'No short URL returned';
+            } catch (error) {
+                responseElement.textContent = 'Error: ' + error.message;
+            }
+        }
+    </script>
+</head>
+<body>
+    <h1>Short URL Generator</h1>
+    <input type="text" id="urlInput" placeholder="Enter URL" />
+    <button onclick="sendPostRequest()">Shorten URL</button>
+    <div id="response"></div>
+</body>
+</html>

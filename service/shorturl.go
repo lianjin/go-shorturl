@@ -5,19 +5,30 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"fmt"
+	"gsurl/config"
 	"gsurl/log"
 	"gsurl/storage"
 	"strings"
+	"time"
 )
 
 const (
-	dict      = "abcdefghijklmnopqrstuvwxyzABCEDFGHIJKLMNOPQRSTUVWXYZ0123456789"
-	urlPrefix = "http://127.0.0.0/"
+	dict                  = "abcdefghijklmnopqrstuvwxyzABCEDFGHIJKLMNOPQRSTUVWXYZ0123456789"
+	cacheExpireTime4Write = time.Second * 3
+	cacheExpireTime4Read  = time.Hour * 24
 )
 
 func GenShortUrl(ctx context.Context, url string) (string, error) {
 	hashVal := hashString(url)
+	if val, exist := GetFromCache(hashVal); exist {
+		return formstShortUrl(val), nil
+	}
 	shortUrl, err := storage.GetUrlByHashCode(ctx, hashVal)
+	defer func() {
+		if err == nil && shortUrl != nil {
+			PutCache(hashVal, shortUrl.ShortCode, cacheExpireTime4Write)
+		}
+	}()
 	if err != nil {
 		log.Logger.Errorf("Error retrieving URL by hash code: %v", err)
 		return "", err
@@ -40,7 +51,15 @@ func GenShortUrl(ctx context.Context, url string) (string, error) {
 }
 
 func GetShortUrl(ctx context.Context, shortCode string) (string, error) {
+	if val, exist := GetFromCache(shortCode); exist {
+		return val, nil
+	}
 	shortUrl, err := storage.GetUrlByShortCode(ctx, shortCode)
+	defer func() {
+		if err == nil && shortUrl != nil {
+			PutCache(shortCode, shortUrl.OriginUrl, cacheExpireTime4Read)
+		}
+	}()
 	if err != nil {
 		log.Logger.Errorf("Error retrieving URL by short code: %v", err)
 		return "", err
@@ -53,7 +72,7 @@ func GetShortUrl(ctx context.Context, shortCode string) (string, error) {
 }
 
 func formstShortUrl(code string) string {
-	return fmt.Sprintf("%s%s", urlPrefix, code)
+	return fmt.Sprintf("%s/%s", config.AppConfig.Host, code)
 }
 
 func encode(num int64) string {

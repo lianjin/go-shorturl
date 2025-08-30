@@ -1,6 +1,8 @@
 package log
 
 import (
+	"gsurl/config"
+
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
@@ -13,9 +15,12 @@ func Init() {
 	encoderCfg.TimeKey = "timestamp"
 	encoderCfg.EncodeTime = zapcore.TimeEncoderOfLayout("2006-01-02 15:04:05.000")
 	encoderCfg.EncodeLevel = zapcore.CapitalLevelEncoder
-
+	logLevel, err := zap.ParseAtomicLevel(config.AppConfig.Log.Level)
+	if err != nil {
+		logLevel = zap.NewAtomicLevelAt(zap.InfoLevel)
+	}
 	config := zap.Config{
-		Level:             zap.NewAtomicLevelAt(zap.DebugLevel),
+		Level:             logLevel,
 		Development:       false,
 		DisableCaller:     false,
 		DisableStacktrace: false,

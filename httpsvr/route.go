@@ -25,6 +25,7 @@ func Init() {
 	r.Use(middleware.PrometheusMiddleware())
 	gin.DefaultWriter = &zapLogger{logger: zap.L().WithOptions(zap.AddCallerSkip(1), zap.WithCaller(false))}
 	gin.DefaultErrorWriter = &zapLogger{logger: zap.L().WithOptions(zap.AddStacktrace(zap.ErrorLevel))}
+	r.Static("/static", "./static")
 	r.GET("/metrics", gin.WrapH(promhttp.Handler()))
 	r.POST("/short-url", controller.GenShortUrl)
 	r.GET("/:short_code", controller.GetShortUrl)
